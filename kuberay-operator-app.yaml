@@ -1,0 +1,29 @@
+# kuberay-operator-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kuberay-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: kuberay-operator
+    # Use the official KubeRay Helm repository
+    repoURL: "https://ray-project.github.io/kuberay-helm/"
+    # Use a chart version that matches the CRD version for compatibility.
+    targetRevision: 1.4.0
+    helm:
+      # This explicitly tells Argo CD's Helm engine to not install CRDs,
+      # as we are managing them separately with the `kuberay-crds` app.
+      skipCrds: true
+  destination:
+    server: "https://kubernetes.default.svc"
+    # Deploy the operator into a dedicated namespace for better organization.
+    namespace: ray-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # Automatically create the `ray-system` namespace if it doesn't exist.
+      - CreateNamespace=true

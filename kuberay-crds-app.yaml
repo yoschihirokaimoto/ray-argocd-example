@@ -1,0 +1,31 @@
+# kuberay-crds-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kuberay-crds
+  namespace: argocd
+  # Add a finalizer to ensure CRDs are not accidentally deleted by Argo CD
+  # if this application is ever deleted.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/ray-project/kuberay.git"
+    # Pinning to a specific stable version is recommended for production.
+    # v1.1.2 is a recent stable version.
+    targetRevision: v1.4.0
+    path: ray-operator/config/crd
+  destination:
+    server: "https://kubernetes.default.svc"
+    # CRDs are cluster-scoped, so the namespace is technically ignored,
+    # but it is a required field. `default` is a safe choice.
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: false # It's safer to not prune CRDs automatically.
+      selfHeal: true
+    syncOptions:
+      # Use ServerSideApply to avoid the "metadata.annotations: Too long" error.
+      # This is the modern, recommended way to handle large CRDs.
+      - Replace=true
