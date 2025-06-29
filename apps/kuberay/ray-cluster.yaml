@@ -1,0 +1,29 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  name: my-ray-cluster
+spec:
+  rayVersion: "2.47.1" # Specify your desired Ray version
+  headGroupSpec:
+    rayStartParams:
+      dashboard-host: "0.0.0.0"
+    template:
+      spec:
+        containers:
+          - name: ray-head
+            image: rayproject/ray:2.47.1
+            ports:
+              - containerPort: 6379 # GCS
+              - containerPort: 8265 # Dashboard
+              - containerPort: 10001 # Client
+  workerGroupSpecs:
+    - replicas: 2
+      minReplicas: 2
+      maxReplicas: 5
+      groupName: small-group
+      rayStartParams: {}
+      template:
+        spec:
+          containers:
+            - name: ray-worker
+              image: rayproject/ray:2.47.1
