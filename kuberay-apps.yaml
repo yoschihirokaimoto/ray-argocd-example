@@ -1,20 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ray-cluster
+  name: kuberay-apps
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: "https://github.com/yoschihirokaimoto/ray-argocd-example.git"
     targetRevision: HEAD
-    path: apps/kuberay/ray-cluster
+    path: .
+    directory:
+      include: "*-app.yaml"
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: ray-cluster
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
